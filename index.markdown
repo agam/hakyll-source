@@ -45,7 +45,15 @@ Still, you do need to know atleast some Haskell to use Hakyll, so I'll leave it 
 Set up github
 --------------------
 
-To host github pages, you need to create a repo of the form `username/username.github.com`. So [do that now](https://github.com/new). If you haven't checked out a repository before, you'll need to [set up 
+To host github pages, you need to create a repo of the form `username/username.github.com`. So [do that now](https://github.com/new).
+The code for the site will live in a different repo (yeah, this part is a drag compared to Jekyll, where github 'automagically' build the blog on commit, and then takes care of serving the right pages.
+
+To get the same effect in our hakyll blog here, we'll have to set the pages repo as a *submodule* of the source repo. To do that, run
+
+```shell
+git submodule add https://github.com/agam/agam.github.com.git _site
+
+```
 
 
 Setting up hakyll: Overview
@@ -162,4 +170,10 @@ Pushing to Github
 
 Ok, so the blog's basically one stupid black-and-white single page (no problem, we'll add to that later). To get this basic example up and running, make sure you `git add` all the files you created.
 
+In general, this will be a 4 step process:-
+
+1. Edit posts
+2. `hakyll build` to generate site contents inside _site
+3. `cd _site` then `git add -i` and `git commit -m "new post etc"` and `git push origin master`. The blog is now live on Github Pages!
+4. `cd ..` followed by another commit and push to check in your modified post(s)
 
