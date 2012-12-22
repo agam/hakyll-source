@@ -1,4 +1,4 @@
-hakyll-source
-=============
+agam.github.com
+===============
 
-Blog posts and source
+Blog
