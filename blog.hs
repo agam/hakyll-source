@@ -22,3 +22,9 @@ main = hakyll $ do
 	    >>> applyTemplateCompiler "templates/default.html"
             >>> relativizeUrlsCompiler
 
+    match "posts/*" $ do
+        route     $ setExtension "html"
+        compile   $ pageCompiler
+            >>> applyTemplateCompiler "templates/post.html"
+            >>> relativizeUrlsCompiler
+

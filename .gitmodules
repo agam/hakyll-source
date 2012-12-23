@@ -1,6 +1,3 @@
-[submodule "agam.github.com"]
-	path = agam.github.com
-	url = https://github.com/agam/agam.github.com.git
 [submodule "_site"]
 	path = _site
 	url = https://github.com/agam/agam.github.com.git
