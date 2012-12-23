@@ -198,7 +198,7 @@ Ok, so the blog's basically one stupid black-and-white single page (no problem, 
 In general, this will be a 4 step process:-
 
 1. Edit posts
-2. `hakyll build` to generate site contents inside _site
+2. `blog build` to generate site contents inside _site (replace `blog` with whatever you call your `.hs` file)
 3. `cd _site` then `git add -i` and `git commit -m "new post etc"` and `git push origin master`. The blog is now live on Github Pages!
 4. `cd ..` followed by another commit and push to check in your modified post(s)
 
