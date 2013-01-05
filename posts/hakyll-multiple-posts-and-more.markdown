@@ -1,6 +1,6 @@
 ---
 title: Hakyll: multiple posts and more
-date: 23 Dec 2012
+date: 04 Jan 2013
 ---
 
 Handling multiple posts, and more
@@ -85,5 +85,37 @@ Finally, to tie it together, add a match for `posts.html`, which will be the ent
         >>> relativizeUrlsCompiler
 ```
 
+Showing a subset of all posts on the index page
+--------------------------------------------------
+
+Initially, I had some trouble getting this to work, for some reason the ```match "posts/*"``` wasn't working, and I commented out the ```match "index.html"``` and retained the ```index.markdown``` that I had.
+
+Turned out to be another ommission on my part, I had to replace
+
+```haskell
+	match "index.html" $ do
+	create "index.html" $ constA mempty
+```
+
+with
+
+```haskell
+	match "index.html" $ route idRoute
+	create "index.html" $ constA mempty
+```
+
+... and then it works!
+
+Getting the list of the last (say) 3 posts is achieved by having a line similar to the one in the handler for ```posts.html```, except instead of just
+
+```haskell
+	>>> requireAllA "posts/*" addPostList
+```
+
+we now have
+
+```haskell
+        >>> requireAllA "posts/*" (id *** arr (take 3 . reverse . chronological) >>> addPostList)
+```
 
 

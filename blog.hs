@@ -24,24 +24,25 @@ main = hakyll $ do
 
     match "templates/*" $ compile templateCompiler
 
-    match (list ["about.markdown", "index.markdown"]) $ do
+    match (list ["about.markdown"]) $ do
         route     $ setExtension "html"
         compile   $ pageCompiler
 	    >>> applyTemplateCompiler "templates/default.html"
             >>> relativizeUrlsCompiler
 
---    match "index.html" $ do
---    create "index.html" $ constA mempty
---        >>> arr (setField "title" "Agam's Mashed-up Pome")
---        >>> requireAllA "posts/*" (id *** arr (take 3 . reverse . chronological) >>> addPostList)
---        >>> applyTemplateCompiler "templates/index.html"
---        >>> applyTemplateCompiler "templates/default.html"
---        >>> relativizeUrlsCompiler
+    match "index.html" $ route idRoute
+    create "index.html" $ constA mempty
+        >>> arr (setField "title" "Agam's Mashed-up Pome")
+        >>> requireAllA "posts/*" (id *** arr (take 3 . reverse . chronological) >>> addPostList)
+        >>> applyTemplateCompiler "templates/index.html"
+        >>> applyTemplateCompiler "templates/default.html"
+        >>> relativizeUrlsCompiler
 
     match "posts/*" $ do
         route     $ setExtension "html"
         compile   $ pageCompiler
             >>> applyTemplateCompiler "templates/post.html"
+	    >>> applyTemplateCompiler "templates/default.html"
             >>> relativizeUrlsCompiler
 
     match "posts.html" $ route idRoute 
