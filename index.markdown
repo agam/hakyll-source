@@ -1,6 +1,4 @@
 
-Recent posts :
+Welcome to my Github blog. This site is generated using Hakyll.
 
-[Beginning hakyll](/posts/beginning-with-hakyll.html)
-[Multiple posts and more](/posts/hakyll-multiple-posts-and-more.html)
-
+See [All posts](posts.html)

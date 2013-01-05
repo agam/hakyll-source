@@ -34,7 +34,7 @@ Also, I created `templates/post.html`, which has some basic boilerplate differen
         $$body$$
 ~~~
 
-Ok, `ghc --make blog.hs && ./blog preview` confirms that all is well. There's still the problem that the 
+Ok, `ghc --make blog.hs && ./blog preview` confirms that all is well.
 
 Analytics and Comments
 -------------------------
@@ -44,6 +44,46 @@ I'll be brief here, since you probably already know this, and this isn't relevan
 Enter your username, password, site url, and you'll be shown a list of hosting platforms; just select *Universal Code* from the list, then copy-paste the javascript into the html footer of your post template. Done. Your posts now have comments!
 
 Similarly, if you want to track site visits, [Google Analytics](www.google.com/analytics/) is a quick solution. Sign up for a new account, enter the website name, and then get your "tracking code", which is a bit of javascript you (again) tack on to the end of each post's html.
+
+Showing a list of posts
+-------------------------
+
+At a minimum, we'd like to show the last few posts on the index page, and provide a link to the list of *all* posts.
+
+Let's do the second item first. To do this, we'll create a pseudo-page that will be defined based on the list of posts found in the `posts/` subdirectory.
+
+(BTW this is heavily inspired by [this hakyll example](https://github.com/jaspervdj/hakyll-examples/blob/master/feedblog/hakyll.hs))
+
+Since we want to have a 'list of posts' on the index page as well, this common functionality can be abstracted out.
+
+```haskell
+addPostList :: Compiler (Page String, [Page String]) (Page String)
+addPostList = setFieldA "posts" $
+    arr (reverse . chronological)
+        >>> require "templates/postitem.html" (\p t -> map (applyTemplate t) p)
+        >>> arr mconcat
+        >>> arr pageBody
+```
+
+Now create a rudimentary html fragment that will hold the 'post summary'
+
+```html
+<li>
+   <a href="$url$">$title$</a> - <em>$date$</em>
+</li>
+```
+
+Finally, to tie it together, add a match for `posts.html`, which will be the entry point to show the list of all posts.
+
+```haskell
+    match "posts.html" $ route idRoute 
+    create "posts.html" $ constA mempty
+        >>> arr (setField "title" "All posts")
+        >>> requireAllA "posts/*" addPostList
+        >>> applyTemplateCompiler "templates/posts.html"
+        >>> applyTemplateCompiler "templates/default.html"
+        >>> relativizeUrlsCompiler
+```
 
 
 
