@@ -25,14 +25,14 @@ I modified `index.markdown` to explicitly point to the two posts for now (i.e. t
 
 Also, I created `templates/post.html`, which has some basic boilerplate difference from the template used to serve the index page :-
 
-~~~
+```html
         <h1>$$title$$</h1>
 	<br>
 	<h2>$$date$$</h2>
 	<br>
 
         $$body$$
-~~~
+```
 
 Ok, `ghc --make blog.hs && ./blog preview` confirms that all is well.
 
@@ -52,7 +52,7 @@ At a minimum, we'd like to show the last few posts on the index page, and provid
 
 Let's do the second item first. To do this, we'll create a pseudo-page that will be defined based on the list of posts found in the `posts/` subdirectory.
 
-(BTW this is heavily inspired by [this hakyll example](https://github.com/jaspervdj/hakyll-examples/blob/master/feedblog/hakyll.hs))
+(BTW this is heavily ~~inspired by~~ copy-pasted from [this hakyll example](https://github.com/jaspervdj/hakyll-examples/blob/master/feedblog/hakyll.hs))
 
 Since we want to have a 'list of posts' on the index page as well, this common functionality can be abstracted out.
 
@@ -69,7 +69,7 @@ Now create a rudimentary html fragment that will hold the 'post summary'
 
 ```html
 <li>
-   <a href="$url$">$title$</a> - <em>$date$</em>
+   <a href="$ url $">$ title $</a> - <em>$ date $</em>
 </li>
 ```
 
@@ -117,5 +117,10 @@ we now have
 ```haskell
         >>> requireAllA "posts/*" (id *** arr (take 3 . reverse . chronological) >>> addPostList)
 ```
+
+CSS-ifying
+-----------
+
+You probably know more about this than me, but if you don't want a black-and white, crammed together bunch of text, you probably want atleast a couple of css rules for your headers and the body text etc. I cobbled together mine based on some random examples I found online, pick yours as you see fit.
 
 

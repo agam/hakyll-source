@@ -1,27 +1,32 @@
 body {
-    width: 600px;
-    margin: 0px auto 0px auto;
+width: 600px;
+margin: 0px auto 0px auto;
+color: #555;
 }
 
-div#navigation {
-    text-align: center;
-    border-bottom: 4px solid black;
+h1, h2 {
+font-family: "dejavu sans", sans-serif;
+font-weight: bold;
 }
 
-div#navigation a {
-    color: white;
-    text-decoration: none;
-    background-color: black;
-    padding: 3px 10px 3px 10px;
-    margin: 0px 10px 0px 10px;
+h1 {
+font-size: 2em;
+color: #8258FA;
 }
 
-div.figure {
-    float: right;
-    margin: 20px 0px 20px 20px;
+h2 {
+font-size: 1.5em;
+color: #5858FA;
 }
 
-div.figure p.caption {
-    text-align: center;
-    font-style: italic;
+a {
+font-family: "dejavu serif", serif;
 }
+
+p, ul {
+font-family: georgia, serif;
+font-size: 1.2em;
+line-height: 1.4em;
+display: block;
+}
+
