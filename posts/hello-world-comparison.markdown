@@ -48,6 +48,30 @@ nm haskellhelloworld | wc -l
 6578
 ```
 
+Differences in libraries linked in :-
+
+```
+$ ldd cpphelloworld
+	linux-vdso.so.1 =>  (0x00007fffcb5a7000)
+	libstdc++.so.6 => /usr/lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007ffe35064000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007ffe34ca5000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007ffe349a8000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007ffe35381000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007ffe34792000)
+
+$ ldd haskellhelloworld
+	linux-vdso.so.1 =>  (0x00007fff681b9000)
+	libgmp.so.10 => /usr/lib/x86_64-linux-gnu/libgmp.so.10 (0x00007f427e124000)
+	libffi.so.6 => /usr/lib/x86_64-linux-gnu/libffi.so.6 (0x00007f427df1c000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f427dc1f000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f427da17000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f427d813000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f427d453000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f427d236000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f427e3af000)
+```
+
+
 C++ Object Code
 ------------
 
@@ -179,16 +203,127 @@ _GLOBAL__sub_I_main:
 	.quad	_GLOBAL__sub_I_main
 ```
 
-(Omitted a bunch of library references that looked like 
+Omitted a bunch of library references that looked like 
 
 ```nasm
 	.weakref	_ZL22__gthrw_pthread_createPmPK14pthread_attr_tPFPvS3_ES3_,pthread_create
 ```
-)
 
 
-(Coming soon!) Haskell object code:
+Haskell core
 ---------------------
+
+Haskell code generation is **significantly** different, so we'll look at generated [_core_](http://www.haskell.org/haskellwiki/Performance/GHC#Looking_at_the_Core) code first.
+
+The best way for this is to use the ```ghc-core``` package.
+
+```shell
+$ cabal install ghc-core
+$ ~/.cabal/bin/ghc-core --no-cast --no-asm haskellhelloworld.hs
+```
+
+I've removed the _attributes_ of functions, which look something like
+
+```haskell
+[GblId,
+ Unf=Unf{Src=<vanilla>, TopLvl=True, Arity=0, Value=False,
+         ConLike=False, Cheap=False, Expandable=False,
+         Guidance=IF_ARGS [] 60 0}]
+```
+
+The cleaned up core looks like this:
+
+
+```haskell
+main2 :: [Char]
+main2 = unpackCString# "Hello World"
+```
+
+The code seemse full of a lot of ```#```s, these are [primitive types](http://www.haskell.org/ghc/docs/latest/html/users_guide/primitives.html). The 'raw' string is made available as a different type to the program we wrote. Ghci is a good way to explore the type relationships here.
+
+```haskell
+Prelude> :t "Hello world"
+"Hello world" :: [Char]
+Prelude> :t putStrLn
+putStrLn :: String -> IO ()
+
+Prelude> :browse GHC.CString
+...
+... (other functions)
+...
+GHC.CString.unpackCString# :: GHC.Prim.Addr# -> [Char]
+```
+
+Continuing with our exploration of the core, ```main1``` is defined as a lambda function that effectively performs a```return``` on the value returned by ```Handle.Text.hPutStr2```
+
+```haskell
+main1
+  :: State# RealWorld
+     -> (# State# RealWorld, () #)
+main1 =
+  \ (eta_B1 :: State# RealWorld) ->
+    Handle.Text.hPutStr2
+      Handle.FD.stdout main2 True eta_B1
+```
+
+Once again, ghci to the rescue:
+```haskell
+Prelude> :m GHC.IO.Handle.Text
+Prelude GHC.IO.Handle.Text> :t hPutStrLn
+hPutStr :: GHC.IO.Handle.Types.Handle -> String -> IO ()
+Prelude GHC.IO.Handle.Text> :m GHC.IO.Handle.FD
+Prelude GHC.IO.Handle.FD> :t stdout
+stdout :: GHC.IO.Handle.Types.Handle
+```
+
+Also, internally in [the source for this module](http://hackage.haskell.org/packages/archive/base/4.3.1.0/doc/html/src/GHC-IO-Handle-Text.html), ```hPutStrLn``` is implemented in terms of ```hPutStr'```, which has the type signature 
+
+```haskell
+hPutStr' :: Handle -> String -> Bool -> IO ()
+```
+
+Moving on, a ```main``` is defined but never used (perhaps just for correspondence with the user program?). Anywya, that is followed by a ```main3``` which actually runs the code. 
+
+
+```
+main :: IO ()
+main =
+  main1
+  
+
+main3
+  :: State# RealWorld
+     -> (# State# RealWorld, () #)
+main3 =
+  \ (eta_X9 :: State# RealWorld) ->
+    runMainIO1
+      @ ()
+      (main1
+       )
+      eta_X9
+
+:main :: IO ()
+:main =
+  main3
+```
+
+Again, internally, the comments for ```runMainIO``` in the [corresponding source file](http://hackage.haskell.org/packages/archive/base/3.0.1.0/doc/html/src/GHC-TopHandler.html) say:
+
+```haskell
+-- | 'runMainIO' is wrapped around 'Main.main' (or whatever main is
+-- called in the program).  It catches otherwise uncaught exceptions,
+-- and also flushes stdout\/stderr before exiting.
+runMainIO :: IO a -> IO a
+runMainIO main = (do a <- main; cleanUp; return a) `catchException` topHandler
+```
+
+Alright .... we're done with the core, and can look at the assembly, in full now.
+
+Haskell object code
+-------------------
+
+
+As mentioned earlier, the object code here hardly corresponds to our one-line program, but we can read it (sort of !) since we know the core. First off is a declaratoin for the 'real' and 'dummy' ```main``` methods.
 
 ```nasm
 .data
@@ -203,8 +338,15 @@ __stginit_ZCMain:
 .section .data
 	.align 8
 .align 1
+```
+
+It is common in generated assembly to see functions wrapped in closures. So there will typically be 'info' for the function, a 'closure' for it, and when needed to be called, a 'jump' to it.
+
+
+```nasm
 sfB_srt:
 	.quad	ghczmprim_GHCziCString_unpackCStringzh_closure
+
 .data
 	.align 8
 .align 1
@@ -213,6 +355,30 @@ sfB_closure:
 	.quad	0
 	.quad	0
 	.quad	0
+```
+
+BTW I wanted to get the "official" line on this, so I went to the [haskell wiki](http://hackage.haskell.org/trac/ghc/wiki/Commentary/Compiler/GeneratedCode) and found this:
+
+```
+The goal of the STG machine is to reduce the current expression to a value.
+
+When it has done so, it:
+
+Stores a tagged pointer to evaluated closure in the STG register R1
+Jumps to the entry code of the info table pointed to by the value at the top of the STG stack
+This may also be called the info table of the continuation of the expression
+The continuation code is responsible for popping its info pointer (and stack-allocated
+free variables, if any) from the stack before returning.
+
+Arguments are passed on the stack, and are popped by the callee. Upon a jump to the entry
+code for a function, there are always precisely as many arguments on the stack as the
+(statically known) arity of that function, and those arguments will be followed by the
+info pointer of a continuation.
+```
+
+Moving on, this (```cf0_str```) is our output string, declared byte-by-byte.
+
+```nasm
 .section .rodata
 	.align 8
 .align 1
@@ -235,6 +401,46 @@ cfO_str:
 	.long	0
 	.quad	0
 	.quad	4294967318
+```
+
+I was totally stumped by ```newCAF``` and ```CAF_BLACKHOLE_info``` here, so I had to Google around to find [some helpful info on it](http://mainisusuallyafunction.blogspot.com/2011/10/thunks-and-lazy-blackholes-introduction.html).This in turn led me to the [GHC runtime code](https://github.com/ghc/ghc/blob/master/rts/sm/Storage.c#L262) which says
+
+```
+
+   The entry code for every CAF does the following:
+     
+      - builds a CAF_BLACKHOLE in the heap
+
+      - calls newCaf, which atomically updates the CAF with
+        IND_STATIC pointing to the CAF_BLACKHOLE
+
+      - if newCaf returns zero, it re-enters the CAF (see Note [atomic
+        CAF entry])
+
+      - pushes an update frame pointing to the CAF_BLACKHOLE
+
+   Why do we build an BLACKHOLE in the heap rather than just updating
+   the thunk directly?  It's so that we only need one kind of update
+   frame - otherwise we'd need a static version of the update frame
+   too, and various other parts of the RTS that deal with update
+   frames would also need special cases for static update frames.
+
+   newCaf() does the following:
+       
+      - it updates the CAF with an IND_STATIC pointing to the
+        CAF_BLACKHOLE, atomically.
+
+      - it puts the CAF on the oldest generation's mutable list.
+        This is so that we treat the CAF as a root when collecting
+        younger generations.
+
+```
+
+If you want to know more about CAFs (Constant Applicative Forms), see [this wiki page](http://www.haskell.org/haskellwiki/Constant_applicative_form)
+
+So, moving on, what follows is book-keeping (ok, I just really want to skip over these 20 lines)
+
+```haskell
 sfB_info:
 .LcfS:
 	leaq -16(%rbp),%rax
@@ -255,6 +461,11 @@ sfB_info:
 	addq $8,%rsp
 	testq %rax,%rax
 	je .LcfX
+```
+
+Closures in action! Here we see the steps: Move the frame info into place, setup the function we want to call (here ```GHC.String.unpackCString```) and its arguments (```cfo_str``` from above) and then ```jmp``` to an evaluating function (here ```stg_ap_n_fast```).
+
+```haskell
 .LcfY:
 	movq $stg_bh_upd_frame_info,-16(%rbp)
 	leaq -8(%r12),%rax
@@ -270,6 +481,11 @@ sfB_info:
 .LcfX:
 	jmp *(%rbx)
 	.size sfB_info, .-sfB_info
+```
+
+Setting up the ```Main_main_closure```, which combines ```base.SystemIO.putStrLn``` and ```sfB_closure```(above).
+
+```haskell
 .section .data
 	.align 8
 .align 1
@@ -294,6 +510,11 @@ Main_main_closure:
 	.quad	12884901910
 .globl Main_main_info
 .type Main_main_info, @object
+```
+
+Moving on ... bookkeeping for the main function similar for the functions above
+
+```haskell
 Main_main_info:
 .Lcgf:
 	leaq -16(%rbp),%rax
@@ -314,6 +535,11 @@ Main_main_info:
 	addq $8,%rsp
 	testq %rax,%rax
 	je .Lcgk
+```
+
+Running the ```main``` closure ... this is also a demonstration of how functions are connected (one closure is an argument for the other closure)
+
+```haskell
 .Lcgl:
 	movq $stg_bh_upd_frame_info,-16(%rbp)
 	leaq -8(%r12),%rax
@@ -332,6 +558,11 @@ Main_main_info:
 .section .data
 	.align 8
 .align 1
+```
+
+Ok, our last round of setting up the 'running main function' and then its associated book-keeping
+
+```haskell
 ZCMain_main_srt:
 	.quad	base_GHCziTopHandler_runMainIO_closure
 	.quad	Main_main_closure
@@ -373,6 +604,13 @@ ZCMain_main_info:
 	addq $8,%rsp
 	testq %rax,%rax
 	je .LcgH
+```
+
+And finally, this is the ```GHC.TopHandler.runMainIO``` closure being called (if you haven't noticed yet, there are no ```call```s in this code at all (except for ```newCAF```), and everything is done by ```jmp``` instructions!)
+
+The ```Main_main_closure``` above is an argument here to ```runMainIO```.
+
+```nasm
 .LcgI:
 	movq $stg_bh_upd_frame_info,-16(%rbp)
 	leaq -8(%r12),%rax
@@ -392,27 +630,28 @@ ZCMain_main_info:
 .ident "GHC 7.4.1"
 ```
 
-Differences in libraries linked in :-
+And we're done!
 
-```
-agam@agam-glaptop:~/Documents/Code/Throwaway$ ldd cpphelloworld
-	linux-vdso.so.1 =>  (0x00007fffcb5a7000)
-	libstdc++.so.6 => /usr/lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007ffe35064000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007ffe34ca5000)
-	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007ffe349a8000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007ffe35381000)
-	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007ffe34792000)
+Running time comparison
+--------------------------
 
-agam@agam-glaptop:~/Documents/Code/Throwaway$ ldd haskellhelloworld
-	linux-vdso.so.1 =>  (0x00007fff681b9000)
-	libgmp.so.10 => /usr/lib/x86_64-linux-gnu/libgmp.so.10 (0x00007f427e124000)
-	libffi.so.6 => /usr/lib/x86_64-linux-gnu/libffi.so.6 (0x00007f427df1c000)
-	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f427dc1f000)
-	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f427da17000)
-	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f427d813000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f427d453000)
-	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f427d236000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007f427e3af000)
+(only because I couldn't help myself, usual disclaimers about 'this-is-not-a-benchmark' apply)
+
+C++:
+
+```bash
+time (while ((n++ < 100)); do ./cpphelloworld; done)
+real	0m0.250s
+user	0m0.004s
+sys	0m0.036s
 ```
 
+Haskell:
+
+```bash
+time (while ((n++ < 100)); do ./haskellhelloworld; done)
+real	0m0.366s
+user	0m0.004s
+sys	0m0.048s
+```
 
