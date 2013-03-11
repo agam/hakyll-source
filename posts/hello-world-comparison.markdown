@@ -267,6 +267,7 @@ main1 =
 ```
 
 Once again, ghci to the rescue:
+
 ```haskell
 Prelude> :m GHC.IO.Handle.Text
 Prelude GHC.IO.Handle.Text> :t hPutStrLn
