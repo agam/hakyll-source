@@ -656,3 +656,7 @@ user	0m0.004s
 sys	0m0.048s
 ```
 
+Gists
+-----
+*Update*: I've made the complete assembly version of both 'Hello World' programs available as gists.
+So you can look at [The C++ version](https://gist.github.com/agam/5148416) or [The Haskell version](https://gist.github.com/agam/5148398).
