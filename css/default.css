@@ -1,7 +1,7 @@
 body {
 width: 600px;
 margin: 0px auto 0px auto;
-color: #555;
+background: #F2E6C0;
 }
 
 h1, h2 {
@@ -11,22 +11,29 @@ font-weight: bold;
 
 h1 {
 font-size: 2em;
-color: #8258FA;
+color: #669999;
 }
 
 h2 {
 font-size: 1.5em;
-color: #5858FA;
+color: #708D53;
 }
 
 a {
-font-family: "dejavu serif", serif;
+font-family: verdana, serif;
 }
 
 p, ul {
-font-family: georgia, serif;
+font-family: verdana;
 font-size: 1.2em;
 line-height: 1.4em;
 display: block;
+}
+
+code {
+width: 600px
+font-family: "Andale Mono", AndaleMono, monospace;
+font-size: 1.0em;
+background: #DEDECE;
 }
 
