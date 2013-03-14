@@ -366,15 +366,16 @@ The goal of the STG machine is to reduce the current expression to a value.
 When it has done so, it:
 
 Stores a tagged pointer to evaluated closure in the STG register R1
-Jumps to the entry code of the info table pointed to by the value at the top of the STG stack
+Jumps to the entry code of the info table pointed to by the value at the top
+of the STG stack
 This may also be called the info table of the continuation of the expression
-The continuation code is responsible for popping its info pointer (and stack-allocated
-free variables, if any) from the stack before returning.
+The continuation code is responsible for popping its info pointer (and stack-
+allocated free variables, if any) from the stack before returning.
 
-Arguments are passed on the stack, and are popped by the callee. Upon a jump to the entry
-code for a function, there are always precisely as many arguments on the stack as the
-(statically known) arity of that function, and those arguments will be followed by the
-info pointer of a continuation.
+Arguments are passed on the stack, and are popped by the callee. Upon a
+jump to the entry code for a function, there are always precisely as many
+arguments on the stack as the (statically known) arity of that function,
+and those arguments will be followed by the info pointer of a continuation.
 ```
 
 Moving on, this (```cf0_str```) is our output string, declared byte-by-byte.
