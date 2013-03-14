@@ -1,7 +1,11 @@
 body {
 background: #F2E6C0;
-margin: 0px auto 0px auto;
-width: 600px;
+border: 20px hidden;
+border-radius: 20px;
+box-shadow: 10px 10px 20px 25px #C2B89A;
+margin: 50px auto;
+padding: 20px 20px 20px 20px;
+width: 620px;
 }
 
 h1, h2 {
@@ -37,6 +41,7 @@ border-radius: 10px;
 box-shadow: 3px 3px 5px 6px #DEDECE;
 font-family: "Andale Mono", AndaleMono, monospace;
 font-size: 1.0em;
+padding: 10px 10px 10px 10px;
 white-space: pre;
 width: 600px
 }
