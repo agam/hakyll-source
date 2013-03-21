@@ -95,6 +95,9 @@ $ git rm -r _site
 rm '_site'
 $ git submodule add --force git@github.com:agam/agam.github.com.git _site
 Reactivating local git directory for submodule '_site'.
+$ cd _site
+$ git checkout master
+$ cd ..
 $ ./blog build
 ```
 
