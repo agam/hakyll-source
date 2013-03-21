@@ -208,3 +208,5 @@ In general, this will be a 4 step process:-
 For reference, my hakyll source lives [here](https://github.com/agam/hakyll-source) and the static website is generated [here](https://github.com/agam/agam.github.com)
 
 *Continue on to [part 2](/posts/hakyll-multiple-posts-and-more.html)*
+
+_**Update**_: Since the writing of this post, Hakyll has gone from 3.x to 4.x and changed its DSL significantly (see [a post on that](/posts/hakyll-broken.html)).

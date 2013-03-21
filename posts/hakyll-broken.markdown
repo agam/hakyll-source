@@ -107,6 +107,6 @@ Yes, I know. Sad.
 
 But it works! (atleast the chronological sorting works again).
 
-
-_Update:_ Just for fun, I tweaked the CSS of the page a bit, to make it a little less bland.
+_**Update:**_ [This diff](https://github.com/agam/hakyll-source/commit/9af1c492dc34e2ffb677a619ac86113a8a716703) might help to show the changes required.
+_**Update:**_ Just for fun, I tweaked the CSS of the page a bit, to make it a little less bland.
 
