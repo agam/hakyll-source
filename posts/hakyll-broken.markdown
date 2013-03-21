@@ -83,9 +83,27 @@ I also had to change the date format from ```%d %m %Y``` to ```%Y-%m-%d```, sinc
 
 error message, looking at the [source](https://github.com/jaspervdj/hakyll/blob/master/src/Hakyll/Web/Template/Context.hs#L200) I found that only a few formats were supported.
 
+Finally, right at the end, I clobbered the git submodule in my output directory when I did a ```./blog rebuild```. So to bring it back, I had to
+
+```shell
+$ rm -f .gitmodules
+$ ./blog clean
+Removing _site...
+Removing _cache...
+Removing _cache/tmp...
+$ git rm -r _site
+rm '_site'
+$ git submodule add --force git@github.com:agam/agam.github.com.git _site
+Reactivating local git directory for submodule '_site'.
+$ ./blog build
+```
+
 So ... no outward change in appearance, but a lot of time wasted, and all because I was bold enough to run ```cabal update```.
+
 Yes, I know. Sad.
+
 But it works! (atleast the chronological sorting works again).
+
 
 _Update:_ Just for fun, I tweaked the CSS of the page a bit, to make it a little less bland.
 
