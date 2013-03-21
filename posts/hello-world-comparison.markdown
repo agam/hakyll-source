@@ -1,6 +1,6 @@
 ---
 title: Comparing "Hello World" in C++ and Haskell
-date: 10 Mar 2013
+date: 2013-03-10
 ---
 
 "Hello World" in C++ and Haskell

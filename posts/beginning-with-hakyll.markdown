@@ -1,6 +1,6 @@
 ---
 title: Beginning Hakyll
-date: 22 Dec 2012
+date: 2012-12-22
 ---
 
 Getting up and running with Hakyll

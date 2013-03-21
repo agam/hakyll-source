@@ -1,10 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Prelude hiding (id)
-import Control.Category (id)
-import Control.Arrow ((>>>), (***), arr)
-import Data.Monoid (mempty, mconcat)
+import Control.Applicative ((<$>))
+import Data.Monoid (mappend, mconcat)
 
 import Hakyll
 
@@ -24,40 +22,67 @@ main = hakyll $ do
 
     match "templates/*" $ compile templateCompiler
 
-    match (list ["about.markdown"]) $ do
+    --- About page
+    --- TODO(agam): Add separate template for the about page
+    match "about.markdown" $ do
         route     $ setExtension "html"
-        compile   $ pageCompiler
-	    >>> applyTemplateCompiler "templates/default.html"
-            >>> relativizeUrlsCompiler
+        compile   $ pandocCompiler
+            >>= loadAndApplyTemplate "templates/default.html" defaultContext
+            >>= relativizeUrls
 
-    match "index.html" $ route idRoute
-    create "index.html" $ constA mempty
-        >>> arr (setField "title" "Agam's Mashed-up Pome")
-        >>> requireAllA "posts/*" (id *** arr (take 3 . reverse . chronological) >>> addPostList)
-        >>> applyTemplateCompiler "templates/index.html"
-        >>> applyTemplateCompiler "templates/default.html"
-        >>> relativizeUrlsCompiler
-
+    --- Individual posts
+    --- TODO(agam): Add tags for posts, and a page with tags for all posts
     match "posts/*" $ do
         route     $ setExtension "html"
-        compile   $ pageCompiler
-            >>> applyTemplateCompiler "templates/post.html"
-	    >>> applyTemplateCompiler "templates/default.html"
-            >>> relativizeUrlsCompiler
+        compile   $ pandocCompiler
+            >>= loadAndApplyTemplate "templates/post.html" postContext
+            >>= loadAndApplyTemplate "templates/default.html" defaultContext
+            >>= relativizeUrls
 
-    match "posts.html" $ route idRoute 
-    create "posts.html" $ constA mempty
-        >>> arr (setField "title" "All posts")
-        >>> requireAllA "posts/*" addPostList
-        >>> applyTemplateCompiler "templates/posts.html"
-        >>> applyTemplateCompiler "templates/default.html"
-        >>> relativizeUrlsCompiler
+    --- List of all posts
+    --- TODO(agam): Find a way to avoid duplication; this is basically right
+    ---             now the same as the Main page, without the 'take 3'
+    create ["posts.html"] $ do
+    route idRoute
+    compile $ do
+        list <- postList "posts/*" recentFirst id
+        let postsContext = constField "posts" list `mappend`
+                constField "title" "Posts" `mappend`
+                defaultContext
+        
+        makeItem ""
+            >>= loadAndApplyTemplate "templates/posts.html" postsContext
+            >>= loadAndApplyTemplate "templates/default.html" defaultContext
+            >>= relativizeUrls
+
+    --- Main page
+    create ["index.html"] $ do
+    route idRoute
+    compile $ do
+        list <- postList "posts/*" recentFirst (take 3)
+        let indexContext = constField "posts" list `mappend`
+                constField "title" "Home" `mappend`
+                defaultContext
+        
+        makeItem ""
+            >>= loadAndApplyTemplate "templates/index.html" indexContext
+            >>= loadAndApplyTemplate "templates/default.html" indexContext
+            >>= relativizeUrls
 
 
-addPostList :: Compiler (Page String, [Page String]) (Page String)
-addPostList = setFieldA "posts" $
-    arr (reverse . chronological)
-        >>> require "templates/postitem.html" (\p t -> map (applyTemplate t) p)
-        >>> arr mconcat
-        >>> arr pageBody
+
+--- Contexts etc
+
+postContext :: Context String
+postContext = mconcat
+    [ dateField "date" "%B %e, %Y"
+    , defaultContext
+    ]
+
+postList :: Pattern -> ([Item String] -> Compiler [Item String]) -> ([Item String] -> [Item String]) -> Compiler String
+postList pattern prep listmodifier = do
+    posts <- prep =<< loadAll pattern
+    itemTemplate <- loadBody "templates/postitem.html"
+    applyTemplateList itemTemplate postContext (listmodifier posts)
+
 

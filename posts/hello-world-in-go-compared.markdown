@@ -1,6 +1,6 @@
 ---
 title: Comparing "Hello World" in Go
-date: 12 Mar 2013
+date: 2013-03-12
 ---
 
 Comparing "Hello World" in Go

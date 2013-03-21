@@ -1,6 +1,6 @@
 ---
 title: Comparing basic iteration in C++ and Haskell
-date: 13 Mar 2013
+date: 2013-03-13
 ---
 
 Iteration in C++ and Haskell: Part 1

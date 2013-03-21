@@ -1,6 +1,6 @@
 ---
 title: Hakyll: multiple posts and more
-date: 04 Jan 2013
+date: 2013-01-04
 ---
 
 Handling multiple posts, and more

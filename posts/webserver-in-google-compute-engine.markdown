@@ -1,6 +1,6 @@
 ---
 title: Setting up a Haskell webserver to run in Google Compute Engine
-date: 11 Mar 2013
+date: 2013-03-11
 ---
 
 Setting up a Haskell webserver to run in Google Compute Engine
