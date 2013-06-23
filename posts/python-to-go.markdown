@@ -43,3 +43,37 @@ Initial stupid error: All requests were going to the same handler (including sta
 
 Ok, all set, the barebones appengine site is up and running, I hope I can add some fun stuff to this in the future!
 
+Update:
+We aren't done yet; after I uploaded the app (`appcfg.py update`, which by the way prefers `--oauth2` but won't tell you about it) the html wasn't being served.
+I added a `log.Fatal()` and sure enough the file wasn't being read any more.
+
+This was also a good time to see error handling in place, the application logs showed
+```
+panic: os.Exit called
+runtime.panic go/src/pkg/runtime/panic.c:230
+os.Exit go/src/pkg/os/proc.go:42
+log.Fatal go/src/pkg/log/log.go:289
+agamsweb.indexHandler agamsweb/agamsweb.go:18
+net/http.HandlerFunc.ServeHTTP go/src/pkg/net/http/server.go:1150
+net/http.(*ServeMux).ServeHTTP go/src/pkg/net/http/server.go:1417
+appengine_internal.executeRequestSafely go/src/pkg/appengine_internal/api_prod.go:248
+appengine_internal.(*server).HandleRequest go/src/pkg/appengine_internal/api_prod.go:198
+reflect.Value.call go/src/pkg/reflect/value.go:474
+reflect.Value.Call go/src/pkg/reflect/value.go:345
+_ _.go:316
+runtime.goexit go/src/pkg/runtime/proc.c:280
+```
+
+While testing this I also ran into an appengine bug: it is possible to get the following error message, though it literally doesn't make much sense
+```
+E 2013-06-23 11:53:32.539
+Request failed because the app binary was missing. This can generally be fixed by redeploying your app.
+I 2013-06-23 11:53:32.539
+This request caused a new process to be started for your application, and thus caused your application code to be loaded for the first time.
+This request may thus take longer and use more CPU than a typical request for your application.
+```
+(i..e how can the app binary be missing _after_ the application was loaded? :) )
+
+After much digging, realized that it isn't possible to read files specified by the `static` handler.
+
+Hmm so I don't really need any go code to do anything meaningful right now, I'll leave 'hello world' running :/
