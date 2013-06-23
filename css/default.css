@@ -1,15 +1,13 @@
 body {
 background: #fbfbf9;
 border: 20px hidden;
-border-radius: 20px;
-box-shadow: 10px 10px 20px 25px #C2B89A;
 margin: 50px auto;
 padding: 20px 20px 20px 20px;
 width: 620px;
 }
 
 h1, h2 {
-font-family: "dejavu sans", sans-serif;
+font-family: "Radley", sans-serif;
 font-weight: bold;
 }
 
@@ -24,22 +22,19 @@ font-size: 1.5em;
 }
 
 a {
-font-family: verdana, serif;
+font-family: "Radley", serif;
 }
 
 p, ul {
 display: block;
-font-family: verdana;
+font-family: "Radley";
 font-size: 1.2em;
 line-height: 1.4em;
 }
 
 pre {
-background: #FFFFD6;
-border: 2px dotted #8BAFB3;
-border-radius: 10px;
-box-shadow: 3px 3px 5px 6px #DEDECE;
-font-family: "Andale Mono", AndaleMono, monospace;
+background: #F5F8FA;
+font-family: "Source Code Pro"
 font-size: 1.0em;
 padding: 10px 10px 10px 10px;
 white-space: pre;
