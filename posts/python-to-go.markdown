@@ -4,9 +4,9 @@ date: 2013-06-22
 ---
 
 Appengine transition from python to Go
+======================================
 
 Hadn't updated this blog for a few months, and neither the "personal web site" that I had started earlier. So, to try something new, I decided to port that appengine site from python to go (looking at the Github logs, I haven't updated that for 2 years !!)
-
 
 The `app.yaml` is changed to get rid of all non-static handlers (which are now declared inside the `func init()` in the `.go` file. So the only handlers will be `/static`, `/robots.txt`, and `/.*`.
 
@@ -43,12 +43,13 @@ Initial stupid error: All requests were going to the same handler (including sta
 
 Ok, all set, the barebones appengine site is up and running, I hope I can add some fun stuff to this in the future!
 
-Update:
+*Update*:
 We aren't done yet; after I uploaded the app (`appcfg.py update`, which by the way prefers `--oauth2` but won't tell you about it) the html wasn't being served.
 I added a `log.Fatal()` and sure enough the file wasn't being read any more.
 
 This was also a good time to see error handling in place, the application logs showed
-```
+
+```shell
 panic: os.Exit called
 runtime.panic go/src/pkg/runtime/panic.c:230
 os.Exit go/src/pkg/os/proc.go:42
@@ -65,7 +66,8 @@ runtime.goexit go/src/pkg/runtime/proc.c:280
 ```
 
 While testing this I also ran into an appengine bug: it is possible to get the following error message, though it literally doesn't make much sense
-```
+
+```shell
 E 2013-06-23 11:53:32.539
 Request failed because the app binary was missing. This can generally be fixed by redeploying your app.
 I 2013-06-23 11:53:32.539
