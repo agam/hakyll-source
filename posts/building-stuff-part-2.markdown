@@ -75,8 +75,11 @@ export LD_LIBRARY_PATH=
 ```
 
 Finally, even this didn't install the libraries where I wanted them. Finally I gave up and just hacked it up:
+
+```shell
 `for f in `find /home/agam/Documents/Code/AmpWorld/cpp-netlib/ | grep 'lib.*a$'`; \
  do sudo cp $f /opt/cpp-static-libs/; done`
+```
  
 Into the furnace: a simple sample
 ----------
@@ -280,6 +283,7 @@ Once this was done, I could successfully do the following:
 $ mkdir build && cd build
 $ cmake ..
 $ make
+```
 
 Scanning dependencies of target hello-world
 [100%] Building CXX object CMakeFiles/hello-world.dir/hello-world.cpp.o
@@ -358,6 +362,7 @@ user    0m0.024s
 sys     0m0.004s
 ```
 
-That's enough, for me, for now. 
+That's enough, for me, for now. Maybe I'll try the [Poco libraries](http://pocoproject.org/) next and see if they are any better.
+
 
 
