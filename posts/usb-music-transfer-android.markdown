@@ -1,6 +1,6 @@
 ---
 title: Getting music onto an Android phone's external storage
-date: 2013-09-29
+date: 2013-09-30
 ---
 
 Getting music onto an Android phone
@@ -118,7 +118,7 @@ Obviously I celebrated too soon. More trudging through posts. As an idea of how 
 
 "Please note the Terence Egan Blog where you took the instructions from is a copy of an OMG Ubuntu article. He has missed an important step *to restart your PC before running the Echo commands* I suggest you try and reinstall from the original OMG Ubuntu source. Click on this link" (emphasis mine, link omitted).
 
-Yes, that's right, _N00b_. You forgot to restart.
+Yes, that's right, _*N00b*_. You forgot to restart.
 
 (In case you're wondering how that story ends,
 "Oh my god!!! I did not know that. Will do this asap. – ubuntico Jul 3 '12 at 16:40
@@ -172,3 +172,11 @@ Recovery [Explicit]
 ```
 
 So yeah. It works. And it's a _magical_ experience.
+
+*Update*:
+To add to my misery, I still can't _play_ the songs. Google Play doesn't pick  them up (no surprise there) but neither does a dedicated music playing app like Winamp.
+
+(Yes, _Winamp!_ It's still around! It still plays the ["whips the llama's ass" clip](http://www.youtube.com/watch?v=cKqKrH0O9yg) when it starts! But it doesn't find my music ?!)
+
+As far as I can tell, this is because on my phone, the sdcard is mounted on `/storage/sdcard1` instead of `/storage/sdcard0`, and that has made all the difference.
+
